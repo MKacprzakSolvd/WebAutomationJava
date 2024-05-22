@@ -1,5 +1,6 @@
 package com.solvd;
 
+import com.solvd.pages.HomePage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -17,6 +18,8 @@ public class App {
             throw new RuntimeException(e);
         }
         driver.get("https://magento.softwaretestingboard.com/");
-        driver.quit();
+        HomePage homePage = new HomePage(driver);
+        homePage.searchForProduct("Backpack");
+        //driver.quit();
     }
 }

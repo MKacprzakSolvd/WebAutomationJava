@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn" strict="true">
+    <Properties>
+        <Property name="logfile">log.log</Property>
+    </Properties>
+    <Appenders>
+        <!-- Console appender configuration -->
+        <Appender type="Console" name="Console" target="SYSTEM_OUT">
+            <Layout type="PatternLayout">
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</Pattern>
+            </Layout>
+        </Appender>
+        <Appender type="File" name="File" fileName="${logfile}">
+            <Layout type="PatternLayout">
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</Pattern>
+            </Layout>
+        </Appender>
+    </Appenders>
+    <Loggers>
+        <Root level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
+        </Root>
+    </Loggers>
+</Configuration>
