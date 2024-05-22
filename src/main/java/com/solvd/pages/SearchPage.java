@@ -21,7 +21,7 @@ public class SearchPage {
 
     public SearchPage(WebDriver driver) {
         this.driver = driver;
-        // TODO check if page loaded
+        // TODO check if page loaded (?and add waiting for loading?)
         PageFactory.initElements(driver, this);
 
         for (WebElement productCardElement : productCardElements) {

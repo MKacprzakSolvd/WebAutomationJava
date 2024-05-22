@@ -40,6 +40,13 @@
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
             <scope>test</scope>
+            <!-- exclude older log4j api version from testng -->
+            <!-- <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions> -->
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
         <dependency>
@@ -63,7 +70,7 @@
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>3.2.0</version>
                     <configuration>
-                        <mainClass>com.solvd.App</mainClass>
+                        <mainClass>com.solvd.Main</mainClass>
                     </configuration>
                 </plugin>
                 <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->

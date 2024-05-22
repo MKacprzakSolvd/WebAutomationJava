@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="warn" strict="true">
     <Properties>
-        <Property name="logfile">log.log</Property>
+        <Property name="logfile">test.log</Property>
     </Properties>
     <Appenders>
         <!-- Console appender configuration -->
