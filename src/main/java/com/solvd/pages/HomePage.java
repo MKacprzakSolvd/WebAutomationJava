@@ -19,8 +19,10 @@ public class HomePage {
         PageFactory.initElements(driver, this);
     }
 
-    public void searchForProduct(String searchTerm) {
+    public SearchPage searchForProduct(String searchTerm) {
         this.searchInputField.sendKeys(searchTerm);
+        // TODO replace with searchInputField.submit()
         this.searchSubmitButton.click();
+        return new SearchPage(this.driver);
     }
 }

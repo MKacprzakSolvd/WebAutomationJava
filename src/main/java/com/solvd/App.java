@@ -1,6 +1,7 @@
 package com.solvd;
 
 import com.solvd.pages.HomePage;
+import com.solvd.pages.SearchPage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -19,7 +20,11 @@ public class App {
         }
         driver.get("https://magento.softwaretestingboard.com/");
         HomePage homePage = new HomePage(driver);
-        homePage.searchForProduct("Backpack");
-        //driver.quit();
+        SearchPage searchPage = homePage.searchForProduct("bag");
+        for (var productCard : searchPage.getProductCards()) {
+            // TODO use logger
+            System.out.println(productCard.getProductData().getName());
+        }
+        driver.quit();
     }
 }
