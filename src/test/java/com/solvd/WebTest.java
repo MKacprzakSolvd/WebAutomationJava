@@ -79,7 +79,7 @@ public class WebTest {
         SoftAssert softAssert = new SoftAssert();
         for (ProductCard productCard : productsPage.getProductCards()) {
             softAssert.assertTrue(productCard.isAvailableInSize(randomSizeOption),
-                    "Product: %s is not available in size '%s'".format(productCard.getName(), randomSizeOption));
+                    "Product: %s is not available in size '%s'".formatted(productCard.getName(), randomSizeOption));
         }
 
         // filter by random color
@@ -92,9 +92,9 @@ public class WebTest {
         // FIXME: check it on all pages
         for (ProductCard productCard : productsPage.getProductCards()) {
             softAssert.assertTrue(productCard.isAvailableInSize(randomSizeOption),
-                    "Product: %s is not available in size '%s;".format(productCard.getName(), randomSizeOption));
+                    "Product: %s is not available in size '%s;".formatted(productCard.getName(), randomSizeOption));
             softAssert.assertTrue(productCard.isAvailableInColor(randomColorOption),
-                    "Product: %s is not available in color '%s'".format(productCard.getName(), randomColorOption));
+                    "Product: %s is not available in color '%s'".formatted(productCard.getName(), randomColorOption));
         }
 
         softAssert.assertAll();
