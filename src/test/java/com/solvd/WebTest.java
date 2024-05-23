@@ -44,7 +44,7 @@ public class WebTest {
      * <p>
      * Steps:
      * 1. Open https://magento.softwaretestingboard.com website
-     * Result: Home page sould load
+     * Result: Home page should load
      * 2. Insert "bag" into search field and click search
      * Result: Search page should open, containing non-empty list of items
      */
