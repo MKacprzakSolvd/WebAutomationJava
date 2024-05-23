@@ -1,8 +1,10 @@
 package com.solvd;
 
+import com.solvd.components.ProductCard;
 import com.solvd.pages.HomePage;
 import com.solvd.pages.ProductsPage;
 import com.solvd.pages.SearchPage;
+import com.solvd.util.RandomPicker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
@@ -11,6 +13,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -59,19 +62,41 @@ public class WebTest {
 
 
     @Test
+    // TODO: add logging
     public void verifySizeColorFilters() {
+        // open products page
         driver.get("https://magento.softwaretestingboard.com/men/tops-men.html");
         ProductsPage productsPage = new ProductsPage(driver);
-        for (var size : productsPage.getFilterOptions(ProductsPage.Filters.SIZE)) {
-            System.out.println(size);
+
+        // filter by random size
+        String randomSizeOption = RandomPicker.getRandomElement(
+                productsPage.getFilterOptions(ProductsPage.Filter.SIZE)
+        );
+        productsPage = productsPage.filterBy(ProductsPage.Filter.SIZE, randomSizeOption);
+
+        // make sure every element is avaliable in given size
+        // FIXME: check it on all pages
+        SoftAssert softAssert = new SoftAssert();
+        for (ProductCard productCard : productsPage.getProductCards()) {
+            softAssert.assertTrue(productCard.isAvailableInSize(randomSizeOption),
+                    "Product: %s is not available in size '%s'".format(productCard.getName(), randomSizeOption));
         }
-        for (var size : productsPage.getFilterOptions(ProductsPage.Filters.COLOR)) {
-            System.out.println(size);
+
+        // filter by random color
+        String randomColorOption = RandomPicker.getRandomElement(
+                productsPage.getFilterOptions(ProductsPage.Filter.COLOR)
+        );
+        productsPage = productsPage.filterBy(ProductsPage.Filter.COLOR, randomColorOption);
+
+        // make sure every element is avaliable in given color and size
+        // FIXME: check it on all pages
+        for (ProductCard productCard : productsPage.getProductCards()) {
+            softAssert.assertTrue(productCard.isAvailableInSize(randomSizeOption),
+                    "Product: %s is not available in size '%s;".format(productCard.getName(), randomSizeOption));
+            softAssert.assertTrue(productCard.isAvailableInColor(randomColorOption),
+                    "Product: %s is not available in color '%s'".format(productCard.getName(), randomColorOption));
         }
-        productsPage = productsPage.filterBy(ProductsPage.Filters.SIZE, "XS");
-        productsPage = productsPage.filterBy(ProductsPage.Filters.COLOR, "Blue");
-        for (var productCard : productsPage.getProductCards()) {
-            LOGGER.info("Product name: " + productCard.getProductData().getName());
-        }
+
+        softAssert.assertAll();
     }
 }

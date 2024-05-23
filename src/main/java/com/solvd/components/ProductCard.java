@@ -6,6 +6,7 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class ProductCard {
     private final WebElement productCardElement;
@@ -16,17 +17,50 @@ public class ProductCard {
     @FindBy(className = "price")
     private WebElement price;
 
+    @FindBy(xpath = ".//*[@attribute-code='size']//*[@option-label]")
+    private List<WebElement> avaliableSizes;
+    @FindBy(xpath = ".//*[@attribute-code='color']//*[@option-label]")
+    private List<WebElement> avaliableColors;
+
     public ProductCard(WebElement productCardElement) {
         this.productCardElement = productCardElement;
         PageFactory.initElements(this.productCardElement, this);
     }
 
+    // FIXME: add available colors and sizes to product data
     public Product getProductData() {
         return Product.builder()
-                .name(this.name.getText())
-                // remove $ sign from price
-                .price(new BigDecimal(extractPrice(this.price.getText())))
+                .name(getName())
+                .price(getPrice())
                 .build();
+    }
+
+    public String getName() {
+        return this.name.getText();
+    }
+
+    public BigDecimal getPrice() {
+        return new BigDecimal(extractPrice(this.price.getText()));
+    }
+
+    public List<String> getAvaliableSizes() {
+        return this.avaliableSizes.stream()
+                .map(webElement -> webElement.getAttribute("option-label"))
+                .toList();
+    }
+
+    public boolean isAvailableInSize(String size) {
+        return getAvaliableSizes().contains(size);
+    }
+
+    public List<String> getAvaliableColors() {
+        return this.avaliableColors.stream()
+                .map(webElement -> webElement.getAttribute("option-label"))
+                .toList();
+    }
+
+    public boolean isAvailableInColor(String color) {
+        return getAvaliableColors().contains(color);
     }
 
     /**

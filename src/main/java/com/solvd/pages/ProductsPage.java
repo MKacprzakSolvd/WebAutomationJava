@@ -32,7 +32,7 @@ public class ProductsPage {
     private ProductFilter colorFilter;
 
     // maps from filters enum to filter object
-    private Map<Filters, ProductFilter> filtersMap = new EnumMap<>(Filters.class);
+    private Map<Filter, ProductFilter> filtersMap = new EnumMap<>(Filter.class);
 
 
     public ProductsPage(WebDriver driver) {
@@ -44,9 +44,9 @@ public class ProductsPage {
         }
 
         this.sizeFilter = new ProductFilter(this.sizeFilterElement, this.driver);
-        this.filtersMap.put(Filters.SIZE, this.sizeFilter);
+        this.filtersMap.put(Filter.SIZE, this.sizeFilter);
         this.colorFilter = new ProductFilter(this.colorFilterElement, this.driver);
-        this.filtersMap.put(Filters.COLOR, this.colorFilter);
+        this.filtersMap.put(Filter.COLOR, this.colorFilter);
     }
 
 
@@ -55,13 +55,13 @@ public class ProductsPage {
     }
 
     //FIXME: add support for case where filter is used (and thus inaccessible)
-    public List<String> getFilterOptions(Filters filterEnum) {
-        return this.filtersMap.get(filterEnum).getOptions();
+    public List<String> getFilterOptions(Filter filter) {
+        return this.filtersMap.get(filter).getOptions();
     }
 
     //FIXME: add support for case where filter is used (and thus inaccessible)
-    public ProductsPage filterBy(Filters filterEnum, String option) {
-        return this.filtersMap.get(filterEnum).filterBy(option);
+    public ProductsPage filterBy(Filter filter, String option) {
+        return this.filtersMap.get(filter).filterBy(option);
     }
 
     // TODO: implement
@@ -69,7 +69,7 @@ public class ProductsPage {
     // getAppliedFilters
 
 
-    public enum Filters {
+    public enum Filter {
         SIZE,
         COLOR
     }
