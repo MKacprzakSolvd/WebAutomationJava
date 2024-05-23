@@ -13,13 +13,12 @@ public class ProductCard {
     // locators
     @FindBy(xpath = ".//*[contains(@class,'product-item-name')]//a[contains(@class,'product-item-link')]")
     private WebElement name;
-    //@FindBy(xpath = ".//*[contains(@class,'price')]")
     @FindBy(className = "price")
     private WebElement price;
 
     public ProductCard(WebElement productCardElement) {
         this.productCardElement = productCardElement;
-        PageFactory.initElements(productCardElement, this);
+        PageFactory.initElements(this.productCardElement, this);
     }
 
     public Product getProductData() {

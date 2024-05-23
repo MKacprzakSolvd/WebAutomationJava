@@ -1,13 +1,13 @@
 package com.solvd.pages;
 
 import com.solvd.components.ProductCard;
-import lombok.Getter;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SearchPage {
@@ -16,7 +16,6 @@ public class SearchPage {
     // TODO make ProductCard implement WebElement
     @FindBy(css = ".product-items .product-item")
     private List<WebElement> productCardElements;
-    @Getter
     private List<ProductCard> productCards = new ArrayList<>();
 
     public SearchPage(WebDriver driver) {
@@ -27,5 +26,9 @@ public class SearchPage {
         for (WebElement productCardElement : productCardElements) {
             this.productCards.add(new ProductCard(productCardElement));
         }
+    }
+
+    public List<ProductCard> getProductCards() {
+        return Collections.unmodifiableList(this.productCards);
     }
 }

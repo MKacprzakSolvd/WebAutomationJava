@@ -1,6 +1,7 @@
 package com.solvd;
 
 import com.solvd.pages.HomePage;
+import com.solvd.pages.ProductsPage;
 import com.solvd.pages.SearchPage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,11 +47,30 @@ public class WebTest {
      */
     @Test
     public void verifyProductSearch() {
+        // TODO ! add asserts
+        // TODO: move url's to separate file
         driver.get("https://magento.softwaretestingboard.com/");
         HomePage homePage = new HomePage(driver);
         SearchPage searchPage = homePage.searchForProduct("bag");
         for (var productCard : searchPage.getProductCards()) {
-            // TODO use logger
+            LOGGER.info("Product name: " + productCard.getProductData().getName());
+        }
+    }
+
+
+    @Test
+    public void verifySizeColorFilters() {
+        driver.get("https://magento.softwaretestingboard.com/men/tops-men.html");
+        ProductsPage productsPage = new ProductsPage(driver);
+        for (var size : productsPage.getFilterOptions(ProductsPage.Filters.SIZE)) {
+            System.out.println(size);
+        }
+        for (var size : productsPage.getFilterOptions(ProductsPage.Filters.COLOR)) {
+            System.out.println(size);
+        }
+        productsPage = productsPage.filterBy(ProductsPage.Filters.SIZE, "XS");
+        productsPage = productsPage.filterBy(ProductsPage.Filters.COLOR, "Blue");
+        for (var productCard : productsPage.getProductCards()) {
             LOGGER.info("Product name: " + productCard.getProductData().getName());
         }
     }
