@@ -22,6 +22,8 @@ public class RandomPicker {
      * @return
      */
     public static <T> List<T> getRandomElements(List<T> list, int count) {
+        // TODO: add checking if count > list.size and throw readable message,
+        //       now it would thrws index out of bound
         // TODO: improve, so that whole list don't need to be copied
         List<T> copy = new ArrayList<>(list);
         Collections.shuffle(copy, random);
