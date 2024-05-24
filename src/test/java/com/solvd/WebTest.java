@@ -1,6 +1,7 @@
 package com.solvd;
 
 import com.solvd.components.ProductCard;
+import com.solvd.model.Product;
 import com.solvd.pages.HomePage;
 import com.solvd.pages.ProductsPage;
 import com.solvd.pages.SearchPage;
@@ -17,6 +18,8 @@ import org.testng.asserts.SoftAssert;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
+import java.util.List;
 
 public class WebTest {
     private static final Logger LOGGER = LogManager.getLogger(WebTest.class.getName());
@@ -63,9 +66,10 @@ public class WebTest {
 
     @Test
     // TODO: add logging
+    // TODO: add test case description (steps, etc)
     public void verifySizeColorFilters() {
         // open products page
-        driver.get("https://magento.softwaretestingboard.com/men/tops-men.html");
+        driver.get("https://magento.softwaretestingboard.com/women/tops-women.html");
         ProductsPage productsPage = new ProductsPage(driver);
 
         // filter by random size
@@ -90,6 +94,7 @@ public class WebTest {
 
         // make sure every element is avaliable in given color and size
         // FIXME: check it on all pages
+        // TODO: test for case when no elements found with selected filters
         for (ProductCard productCard : productsPage.getProductCards()) {
             softAssert.assertTrue(productCard.isAvailableInSize(randomSizeOption),
                     "Product: %s is not available in size '%s;".formatted(productCard.getName(), randomSizeOption));
@@ -98,5 +103,17 @@ public class WebTest {
         }
 
         softAssert.assertAll();
+    }
+
+    @Test
+    public void verifyAddRemoveFromShoppingCart() {
+        // open products page
+        driver.get("https://magento.softwaretestingboard.com/men/tops-men.html");
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        ProductsPage productsPage = new ProductsPage(driver);
+
+        // select two random products
+        List<Product> selectedProducts = RandomPicker.getRandomElements(
+                productsPage.getProducts(), 2);
     }
 }
