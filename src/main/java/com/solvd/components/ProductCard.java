@@ -1,7 +1,10 @@
 package com.solvd.components;
 
 import com.solvd.model.Product;
+import com.solvd.pages.ProductsPage;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
@@ -10,6 +13,7 @@ import java.util.List;
 
 public class ProductCard {
     private final WebElement productCardElement;
+    private final WebDriver driver;
 
     // locators
     @FindBy(xpath = ".//*[contains(@class,'product-item-name')]//a[contains(@class,'product-item-link')]")
@@ -22,10 +26,14 @@ public class ProductCard {
     @FindBy(xpath = ".//*[@attribute-code='color']//*[@option-label]")
     private List<WebElement> avaliableColors;
 
-    public ProductCard(WebElement productCardElement) {
+    @FindBy(css = ".product-item-details .tocart")
+    private WebElement addToCartButton;
+
+    public ProductCard(WebElement productCardElement, WebDriver driver) {
         PageFactory.initElements(productCardElement, this);
         // have to be after PageFactory init, otherwise will be overwritten
         this.productCardElement = productCardElement;
+        this.driver = driver;
     }
 
     // FIXME: add available colors and sizes to product data
@@ -67,6 +75,19 @@ public class ProductCard {
 
     public boolean isAvailableInColor(String color) {
         return getAvaliableColors().contains(color);
+    }
+
+    // TODO: add option to specify size and color
+    public ProductsPage addToCart() {
+        // hover over product cart to show add to cart button
+        Actions action = new Actions(this.driver);
+        action.moveToElement(this.productCardElement).perform();
+        // select first size and color
+        this.avaliableSizes.getFirst().click();
+        this.avaliableColors.getFirst().click();
+        // click it
+        this.addToCartButton.click();
+        return new ProductsPage(this.driver);
     }
 
     /**

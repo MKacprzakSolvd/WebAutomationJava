@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Getter
 @Builder
 public class Product {
+    // TODO add sensible equals
     private String name;
     private BigDecimal price;
     private Integer rating;

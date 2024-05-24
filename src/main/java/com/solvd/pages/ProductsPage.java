@@ -2,6 +2,7 @@ package com.solvd.pages;
 
 import com.solvd.components.ProductCard;
 import com.solvd.components.ProductFilter;
+import com.solvd.components.ShoppingCartPopup;
 import com.solvd.model.Product;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -16,6 +17,10 @@ public class ProductsPage {
     @FindBy(css = ".products .product-items .product-item")
     private List<WebElement> productCardElements;
     private List<ProductCard> productCards = new ArrayList<>();
+
+    @FindBy(xpath = "//*[contains(@class,'page-header')]//*[@data-block='minicart']")
+    private WebElement shoppingCartPopupElement;
+    private ShoppingCartPopup shoppingCartPopup;
 
     // TODO: extract string 'Size' and 'Color' from this and move it somewhere else (as constant)?
     // select filter block that have 'Size' in title
@@ -41,8 +46,10 @@ public class ProductsPage {
         PageFactory.initElements(driver, this);
 
         for (WebElement productCardElement : productCardElements) {
-            this.productCards.add(new ProductCard(productCardElement));
+            this.productCards.add(new ProductCard(productCardElement, driver));
         }
+
+        this.shoppingCartPopup = new ShoppingCartPopup(this.shoppingCartPopupElement, this.driver);
 
         this.sizeFilter = new ProductFilter(this.sizeFilterElement, this.driver);
         this.filtersMap.put(Filter.SIZE, this.sizeFilter);
@@ -59,6 +66,10 @@ public class ProductsPage {
         return this.productCards.stream()
                 .map(productCard -> productCard.getProductData())
                 .toList();
+    }
+
+    public ShoppingCartPopup getShoppingCartPopup() {
+        return this.shoppingCartPopup;
     }
 
     //FIXME: add support for case where filter is used (and thus inaccessible)

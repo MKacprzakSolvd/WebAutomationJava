@@ -24,7 +24,7 @@ public class SearchPage {
         PageFactory.initElements(driver, this);
 
         for (WebElement productCardElement : productCardElements) {
-            this.productCards.add(new ProductCard(productCardElement));
+            this.productCards.add(new ProductCard(productCardElement, driver));
         }
     }
 

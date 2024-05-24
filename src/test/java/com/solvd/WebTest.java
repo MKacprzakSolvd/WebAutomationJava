@@ -38,7 +38,7 @@ public class WebTest {
 
     @AfterClass
     public void tearDown() {
-        driver.quit();
+        //driver.quit();
     }
 
 
@@ -113,7 +113,37 @@ public class WebTest {
         ProductsPage productsPage = new ProductsPage(driver);
 
         // select two random products
-        List<Product> selectedProducts = RandomPicker.getRandomElements(
-                productsPage.getProducts(), 2);
+        List<ProductCard> selectedProductsCards = RandomPicker.getRandomElements(
+                productsPage.getProductCards(), 2);
+        List<Product> selectedProducts = selectedProductsCards.stream()
+                .map(selectedProductCard -> selectedProductCard.getProductData())
+                .toList();
+
+        System.out.println(productsPage.getShoppingCartPopup().isOpened());
+        System.out.println(productsPage.getShoppingCartPopup().isEmpty());
+        System.out.println(productsPage.getShoppingCartPopup().getProductsCount());
+        productsPage.getShoppingCartPopup().open();
+        System.out.println(productsPage.getShoppingCartPopup().isOpened());
+        System.out.println(productsPage.getShoppingCartPopup().isEmpty());
+        System.out.println(productsPage.getShoppingCartPopup().getProductsCount());
+
+        productsPage = selectedProductsCards.getFirst().addToCart();
+
+        System.out.println(productsPage.getShoppingCartPopup().isOpened());
+        System.out.println(productsPage.getShoppingCartPopup().isEmpty());
+        System.out.println(productsPage.getShoppingCartPopup().getProductsCount());
+        productsPage.getShoppingCartPopup().open();
+        System.out.println(productsPage.getShoppingCartPopup().isOpened());
+        System.out.println(productsPage.getShoppingCartPopup().isEmpty());
+        System.out.println(productsPage.getShoppingCartPopup().getProductsCount());
+
+        for (var product : selectedProducts) {
+            System.out.println(product.getName());
+            System.out.println(productsPage.getShoppingCartPopup().isProductInCart(product));
+        }
+
+        productsPage = productsPage.getShoppingCartPopup().removeFromCart(
+                selectedProducts.getFirst()
+        );
     }
 }
