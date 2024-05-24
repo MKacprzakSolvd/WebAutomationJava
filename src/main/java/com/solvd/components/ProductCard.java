@@ -23,8 +23,9 @@ public class ProductCard {
     private List<WebElement> avaliableColors;
 
     public ProductCard(WebElement productCardElement) {
+        PageFactory.initElements(productCardElement, this);
+        // have to be after PageFactory init, otherwise will be overwritten
         this.productCardElement = productCardElement;
-        PageFactory.initElements(this.productCardElement, this);
     }
 
     // FIXME: add available colors and sizes to product data
@@ -33,6 +34,11 @@ public class ProductCard {
                 .name(getName())
                 .price(getPrice())
                 .build();
+    }
+
+    // TODO: remove, only for debugging
+    public WebElement getRoot() {
+        return this.productCardElement;
     }
 
     public String getName() {

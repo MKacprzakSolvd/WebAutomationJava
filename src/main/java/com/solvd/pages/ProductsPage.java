@@ -2,6 +2,7 @@ package com.solvd.pages;
 
 import com.solvd.components.ProductCard;
 import com.solvd.components.ProductFilter;
+import com.solvd.model.Product;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -12,7 +13,7 @@ import java.util.*;
 public class ProductsPage {
     private WebDriver driver;
 
-    @FindBy(css = ".product-items .product-item")
+    @FindBy(css = ".products .product-items .product-item")
     private List<WebElement> productCardElements;
     private List<ProductCard> productCards = new ArrayList<>();
 
@@ -52,6 +53,12 @@ public class ProductsPage {
 
     public List<ProductCard> getProductCards() {
         return Collections.unmodifiableList(this.productCards);
+    }
+
+    public List<Product> getProducts() {
+        return this.productCards.stream()
+                .map(productCard -> productCard.getProductData())
+                .toList();
     }
 
     //FIXME: add support for case where filter is used (and thus inaccessible)
