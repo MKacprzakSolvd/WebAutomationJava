@@ -83,9 +83,13 @@ public class ProductCard {
         // hover over product cart to show add to cart button
         Actions action = new Actions(this.driver);
         action.moveToElement(this.productCardElement).perform();
-        // select first size and color
-        this.avaliableSizes.getFirst().click();
-        this.avaliableColors.getFirst().click();
+        // select first size and color (if colors avaliable)
+        if (!this.avaliableSizes.isEmpty()) {
+            this.avaliableSizes.getFirst().click();
+        }
+        if (!this.avaliableColors.isEmpty()) {
+            this.avaliableColors.getFirst().click();
+        }
         // click it
         this.addToCartButton.click();
         return new ProductsPage(this.driver);

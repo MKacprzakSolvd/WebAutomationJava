@@ -1,6 +1,7 @@
 package com.solvd.components;
 
 import com.solvd.model.Product;
+import com.solvd.pages.CheckoutPageStepOne;
 import com.solvd.pages.ProductsPage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -124,13 +125,14 @@ public class ShoppingCartPopup {
      * Proceeds to checkout page. Cart must have some items, otherwise
      * illegal state exception will be thrown
      */
-    public void toCheckout() {
+    public CheckoutPageStepOne goToCheckout() {
         if (isEmpty()) {
             throw new IllegalStateException("Shopping cart must have at least one product to go to checkout.");
         }
 
         open();
         this.toCheckoutButton.click();
+        return new CheckoutPageStepOne(this.driver);
     }
 
     protected void waitTillCartUpdates() {

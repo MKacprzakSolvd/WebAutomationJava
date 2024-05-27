@@ -2,9 +2,7 @@ package com.solvd;
 
 import com.solvd.components.ProductCard;
 import com.solvd.model.Product;
-import com.solvd.pages.HomePage;
-import com.solvd.pages.ProductsPage;
-import com.solvd.pages.SearchPage;
+import com.solvd.pages.*;
 import com.solvd.util.RandomPicker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -144,5 +142,52 @@ public class WebTest {
 
         Assert.assertTrue(productsPage.getShoppingCartPopup().isEmpty(),
                 "Shopping cart is not empty.");
+    }
+
+
+    @Test
+    public void verifyCheckoutProcessFromProductsPage() {
+        // open products page
+        driver.get("https://magento.softwaretestingboard.com/gear/bags.html");
+        ProductsPage productsPage = new ProductsPage(driver);
+
+        // select random item, add it to the cart and go to checkout
+        ProductCard selectedProductCard = RandomPicker.getRandomElement(productsPage.getProductCards());
+        Product selectedProduct = selectedProductCard.getProductData();
+        productsPage = selectedProductCard.addToCart();
+        // TODO: check if cart contains exactly one product
+        Assert.assertTrue(productsPage.getShoppingCartPopup().isProductInCart(selectedProduct),
+                "Selected product (%s) was not in the cart (on products page)."
+                        .formatted(selectedProduct.getName()));
+        CheckoutPageStepOne checkoutPageStepOne = productsPage.getShoppingCartPopup().goToCheckout();
+
+        // complete first step of checkout
+        int productsInShoppingCart = checkoutPageStepOne.getProductsCount();
+        Assert.assertEquals(productsInShoppingCart, 1,
+                "%d products in shopping car, while expecting only one, during the first step of checkout."
+                        .formatted(productsInShoppingCart));
+        Assert.assertTrue(checkoutPageStepOne.isProductInCart(selectedProduct),
+                "The selected product ('%s') is not in the shopping cart, during the first step of checkout."
+                        .formatted(selectedProduct.getName()));
+
+        // TODO add data provider / read data from config
+        CheckoutPageStepTwo checkoutPageStepTwo = checkoutPageStepOne.goToNextStep(
+                "a@b.com",
+                "John",
+                "Smith",
+                "Postal Inc.",
+                "ul. Wielopole 2",
+                "",
+                "",
+                "Kraków",
+                "małopolskie",
+                "12-345",
+                "Poland",
+                "123456789",
+                CheckoutPageStepOne.ShippingMethod.FIXED
+        );
+
+        CheckoutPageStepThree checkoutPageStepThree = checkoutPageStepTwo.placeOrder();
+        HomePage homePage = checkoutPageStepThree.returnToHomePage();
     }
 }
