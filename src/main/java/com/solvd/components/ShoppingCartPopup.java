@@ -12,8 +12,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.List;
 
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeContains;
-import static org.openqa.selenium.support.ui.ExpectedConditions.not;
+import static org.openqa.selenium.support.ui.ExpectedConditions.*;
 
 public class ShoppingCartPopup {
     // class (added to cartCounterWrapper)  indicating that cart content is updating
@@ -37,6 +36,9 @@ public class ShoppingCartPopup {
 
     @FindBy(css = ".subtotal .price")
     private WebElement itemsPriceIndicator;
+
+    @FindBy(id = "top-cart-btn-checkout")
+    private WebElement toCheckoutButton;
 
     // TODO: replace with custom element
     @FindBy(css = ".product-item-details .product-item-name a")
@@ -93,6 +95,7 @@ public class ShoppingCartPopup {
         return false;
     }
 
+    // FIXME: no need to return new page
     public ProductsPage removeFromCart(Product product) {
         // TODO: rewrite with findProductCard when implemented
         if (!isProductInCart(product)) {
@@ -108,8 +111,26 @@ public class ShoppingCartPopup {
 
         // Confirm removal in modal
         WebElement removalConfirmationButton = this.driver.findElement(removeProductConfirmationButton);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(visibilityOf(removalConfirmationButton));
         removalConfirmationButton.click();
+        waitTillProductRemovedFromCart(product);
         return new ProductsPage(this.driver);
+    }
+
+    // TODO: make this function return CheckoutPage
+
+    /**
+     * Proceeds to checkout page. Cart must have some items, otherwise
+     * illegal state exception will be thrown
+     */
+    public void toCheckout() {
+        if (isEmpty()) {
+            throw new IllegalStateException("Shopping cart must have at least one product to go to checkout.");
+        }
+
+        open();
+        this.toCheckoutButton.click();
     }
 
     protected void waitTillCartUpdates() {
@@ -117,6 +138,10 @@ public class ShoppingCartPopup {
         wait.until(not(attributeContains(this.cartCounterWrapper, "class", CART_UPDATE_INDICATING_CLASS)));
     }
 
-    // toCheckout
+    protected void waitTillProductRemovedFromCart(Product product) {
+        // TODO: check whether nested waits are a problem
+        WebDriverWait wait = new WebDriverWait(this.driver, Duration.ofSeconds(10));
+        wait.until((driver) -> !isProductInCart(product));
+    }
 }
 

@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -20,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 public class WebTest {
     private static final Logger LOGGER = LogManager.getLogger(WebTest.class.getName());
@@ -38,7 +40,7 @@ public class WebTest {
 
     @AfterClass
     public void tearDown() {
-        //driver.quit();
+        driver.quit();
     }
 
 
@@ -111,39 +113,36 @@ public class WebTest {
         driver.get("https://magento.softwaretestingboard.com/men/tops-men.html");
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         ProductsPage productsPage = new ProductsPage(driver);
+        final int PRODUCTS_TO_ADD_TO_CART = 2;
 
         // select two random products
-        List<ProductCard> selectedProductsCards = RandomPicker.getRandomElements(
-                productsPage.getProductCards(), 2);
-        List<Product> selectedProducts = selectedProductsCards.stream()
-                .map(selectedProductCard -> selectedProductCard.getProductData())
-                .toList();
+        List<Product> selectedProducts = RandomPicker.getRandomElements(
+                productsPage.getProducts(), PRODUCTS_TO_ADD_TO_CART);
 
-        System.out.println(productsPage.getShoppingCartPopup().isOpened());
-        System.out.println(productsPage.getShoppingCartPopup().isEmpty());
-        System.out.println(productsPage.getShoppingCartPopup().getProductsCount());
-        productsPage.getShoppingCartPopup().open();
-        System.out.println(productsPage.getShoppingCartPopup().isOpened());
-        System.out.println(productsPage.getShoppingCartPopup().isEmpty());
-        System.out.println(productsPage.getShoppingCartPopup().getProductsCount());
-
-        productsPage = selectedProductsCards.getFirst().addToCart();
-
-        System.out.println(productsPage.getShoppingCartPopup().isOpened());
-        System.out.println(productsPage.getShoppingCartPopup().isEmpty());
-        System.out.println(productsPage.getShoppingCartPopup().getProductsCount());
-        productsPage.getShoppingCartPopup().open();
-        System.out.println(productsPage.getShoppingCartPopup().isOpened());
-        System.out.println(productsPage.getShoppingCartPopup().isEmpty());
-        System.out.println(productsPage.getShoppingCartPopup().getProductsCount());
-
-        for (var product : selectedProducts) {
-            System.out.println(product.getName());
-            System.out.println(productsPage.getShoppingCartPopup().isProductInCart(product));
+        // add them to cart & check if they were added
+        for (Product product : selectedProducts) {
+            Optional<ProductCard> productCard = productsPage.findProductCard(product);
+            Assert.assertTrue(productCard.isPresent(),
+                    "Unable to find product card corresponding to product '%s' in products page"
+                            .formatted(product.getName()));
+            productsPage = productCard.get().addToCart();
+        }
+        int itemsInShoppingCart = productsPage.getShoppingCartPopup().getProductsCount();
+        Assert.assertEquals(itemsInShoppingCart, PRODUCTS_TO_ADD_TO_CART,
+                "Number of products in shopping cart (%d) doesn't match expected number (%d)."
+                        .formatted(itemsInShoppingCart, PRODUCTS_TO_ADD_TO_CART));
+        for (Product product : selectedProducts) {
+            Assert.assertTrue(
+                    productsPage.getShoppingCartPopup().isProductInCart(product),
+                    "Product '%s' was not in the shopping cart".formatted(product.getName()));
         }
 
-        productsPage = productsPage.getShoppingCartPopup().removeFromCart(
-                selectedProducts.getFirst()
-        );
+        // remove products from card & check if they were removed
+        for (Product product : selectedProducts) {
+            productsPage = productsPage.getShoppingCartPopup().removeFromCart(product);
+        }
+
+        Assert.assertTrue(productsPage.getShoppingCartPopup().isEmpty(),
+                "Shopping cart is not empty.");
     }
 }

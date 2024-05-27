@@ -62,6 +62,19 @@ public class ProductsPage {
         return Collections.unmodifiableList(this.productCards);
     }
 
+    /**
+     * finds product card corresponding to passed product
+     */
+    public Optional<ProductCard> findProductCard(Product product) {
+        for (ProductCard productCard : this.productCards) {
+            // TODO: create method representsProduct(Product) in ProductCard and use it here
+            if (productCard.getName().equals(product.getName())) {
+                return Optional.of(productCard);
+            }
+        }
+        return Optional.empty();
+    }
+
     public List<Product> getProducts() {
         return this.productCards.stream()
                 .map(productCard -> productCard.getProductData())

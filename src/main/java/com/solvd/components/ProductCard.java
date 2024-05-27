@@ -77,6 +77,7 @@ public class ProductCard {
         return getAvaliableColors().contains(color);
     }
 
+    // TODO: check if returning new page is necessary
     // TODO: add option to specify size and color
     public ProductsPage addToCart() {
         // hover over product cart to show add to cart button
