@@ -40,7 +40,7 @@ public class WebTest {
 
     @AfterClass
     public void tearDown() {
-        //driver.quit();
+        driver.quit();
     }
 
 
