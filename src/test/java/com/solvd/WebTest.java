@@ -34,11 +34,13 @@ public class WebTest {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
+
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
     }
 
     @AfterClass
     public void tearDown() {
-        driver.quit();
+        //driver.quit();
     }
 
 
@@ -109,7 +111,6 @@ public class WebTest {
     public void verifyAddRemoveFromShoppingCartTest() {
         // open products page
         driver.get("https://magento.softwaretestingboard.com/men/tops-men.html");
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         ProductsPage productsPage = new ProductsPage(driver);
         final int PRODUCTS_TO_ADD_TO_CART = 2;
 
@@ -189,5 +190,33 @@ public class WebTest {
 
         CheckoutPageStepThree checkoutPageStepThree = checkoutPageStepTwo.placeOrder();
         HomePage homePage = checkoutPageStepThree.returnToHomePage();
+    }
+
+    @Test
+    public void verifyItemSortingTest() {
+        driver.get("https://magento.softwaretestingboard.com/women/bottoms-women.html");
+        ProductsPage productsPage = new ProductsPage(driver);
+        SoftAssert softAssert = new SoftAssert();
+
+        ProductsPage.SortOrder[] sortOrdersToCheck = new ProductsPage.SortOrder[]{
+                ProductsPage.SortOrder.BY_NAME_A_TO_Z,
+                ProductsPage.SortOrder.BY_NAME_Z_TO_A,
+                ProductsPage.SortOrder.BY_PRICE_ASCENDING,
+                ProductsPage.SortOrder.BY_PRICE_DESCENDING};
+
+        for (ProductsPage.SortOrder sortOrder : sortOrdersToCheck) {
+            productsPage = productsPage.setSortOrder(sortOrder);
+            softAssert.assertTrue(productsPage.isSortedBy(sortOrder),
+                    "Products sorted incorrectly according to sort order '%s'"
+                            .formatted(sortOrder));
+        }
+        // TODO: go to the next page and check sorting (step 5)
+
+        /*
+            sorting by price (ascending and descending)
+            will fail, page sorts incorrectly (usually last
+            items are in the wrong order)
+         */
+        softAssert.assertAll();
     }
 }
