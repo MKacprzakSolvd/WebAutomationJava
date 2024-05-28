@@ -52,7 +52,7 @@ public class WebTest {
      * Result: Search page should open, containing non-empty list of items
      */
     @Test
-    public void verifyProductSearch() {
+    public void verifyProductSearchTest() {
         // TODO ! add asserts
         // TODO: move url's to separate file
         driver.get("https://magento.softwaretestingboard.com/");
@@ -67,7 +67,7 @@ public class WebTest {
     @Test
     // TODO: add logging
     // TODO: add test case description (steps, etc)
-    public void verifySizeColorFilters() {
+    public void verifySizeColorFiltersTest() {
         // open products page
         driver.get("https://magento.softwaretestingboard.com/women/tops-women.html");
         ProductsPage productsPage = new ProductsPage(driver);
@@ -106,7 +106,7 @@ public class WebTest {
     }
 
     @Test
-    public void verifyAddRemoveFromShoppingCart() {
+    public void verifyAddRemoveFromShoppingCartTest() {
         // open products page
         driver.get("https://magento.softwaretestingboard.com/men/tops-men.html");
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
@@ -146,7 +146,7 @@ public class WebTest {
 
 
     @Test
-    public void verifyCheckoutProcessFromProductsPage() {
+    public void verifyCheckoutProcessFromProductsPageTest() {
         // open products page
         driver.get("https://magento.softwaretestingboard.com/gear/bags.html");
         ProductsPage productsPage = new ProductsPage(driver);
