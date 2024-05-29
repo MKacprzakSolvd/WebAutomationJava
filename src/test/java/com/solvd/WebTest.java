@@ -10,8 +10,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
@@ -22,25 +22,31 @@ import java.util.List;
 import java.util.Optional;
 
 public class WebTest {
+    // TODO: check if I should add volatile to logger
     private static final Logger LOGGER = LogManager.getLogger(WebTest.class.getName());
-    private WebDriver driver = null;
+    private ThreadLocal<WebDriver> driver = new ThreadLocal<>();
 
     // TODO for multithreading BeforeMethod might be better - experiment
-    @BeforeClass
+    @BeforeMethod
     public void setUp() {
         ChromeOptions chromeOptions = new ChromeOptions();
         try {
-            this.driver = new RemoteWebDriver(new URL("http://localhost:4444"), chromeOptions);
+            this.driver.set(
+                    new RemoteWebDriver(new URL("http://localhost:4444"), chromeOptions));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
 
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
     }
 
-    @AfterClass
+    @AfterMethod
     public void tearDown() {
-        driver.quit();
+        driver.get().quit();
+    }
+
+    protected WebDriver getDriver() {
+        return this.driver.get();
     }
 
 
@@ -57,8 +63,8 @@ public class WebTest {
     public void verifyProductSearchTest() {
         // TODO ! add asserts
         // TODO: move url's to separate file
-        driver.get("https://magento.softwaretestingboard.com/");
-        HomePage homePage = new HomePage(driver);
+        getDriver().get("https://magento.softwaretestingboard.com/");
+        HomePage homePage = new HomePage(getDriver());
         SearchPage searchPage = homePage.searchForProduct("bag");
         for (var productCard : searchPage.getProductCards()) {
             LOGGER.info("Product name: " + productCard.getProductData().getName());
@@ -71,8 +77,8 @@ public class WebTest {
     // TODO: add test case description (steps, etc)
     public void verifySizeColorFiltersTest() {
         // open products page
-        driver.get("https://magento.softwaretestingboard.com/women/tops-women.html");
-        ProductsPage productsPage = new ProductsPage(driver);
+        getDriver().get("https://magento.softwaretestingboard.com/women/tops-women.html");
+        ProductsPage productsPage = new ProductsPage(getDriver());
 
         // filter by random size
         String randomSizeOption = RandomPicker.getRandomElement(
@@ -110,8 +116,8 @@ public class WebTest {
     @Test
     public void verifyAddRemoveFromShoppingCartTest() {
         // open products page
-        driver.get("https://magento.softwaretestingboard.com/men/tops-men.html");
-        ProductsPage productsPage = new ProductsPage(driver);
+        getDriver().get("https://magento.softwaretestingboard.com/men/tops-men.html");
+        ProductsPage productsPage = new ProductsPage(getDriver());
         final int PRODUCTS_TO_ADD_TO_CART = 2;
 
         // select two random products
@@ -149,8 +155,8 @@ public class WebTest {
     @Test
     public void verifyCheckoutProcessFromProductsPageTest() {
         // open products page
-        driver.get("https://magento.softwaretestingboard.com/gear/bags.html");
-        ProductsPage productsPage = new ProductsPage(driver);
+        getDriver().get("https://magento.softwaretestingboard.com/gear/bags.html");
+        ProductsPage productsPage = new ProductsPage(getDriver());
 
         // select random item, add it to the cart and go to checkout
         ProductCard selectedProductCard = RandomPicker.getRandomElement(productsPage.getProductCards());
@@ -194,8 +200,8 @@ public class WebTest {
 
     @Test
     public void verifyItemSortingTest() {
-        driver.get("https://magento.softwaretestingboard.com/women/bottoms-women.html");
-        ProductsPage productsPage = new ProductsPage(driver);
+        getDriver().get("https://magento.softwaretestingboard.com/women/bottoms-women.html");
+        ProductsPage productsPage = new ProductsPage(getDriver());
         SoftAssert softAssert = new SoftAssert();
 
         ProductsPage.SortOrder[] sortOrdersToCheck = new ProductsPage.SortOrder[]{
@@ -223,8 +229,8 @@ public class WebTest {
 
     @Test
     public void verifyCheckoutFromItemDetailsPageTest() {
-        driver.get("https://magento.softwaretestingboard.com/men/bottoms-men.html");
-        ProductsPage productsPage = new ProductsPage(driver);
+        getDriver().get("https://magento.softwaretestingboard.com/men/bottoms-men.html");
+        ProductsPage productsPage = new ProductsPage(getDriver());
 
         // select random product
         ProductCard selectedProductCard = RandomPicker.getRandomElement(
@@ -278,8 +284,8 @@ public class WebTest {
 
     @Test
     public void verifyAddingItemReviewTest() {
-        driver.get("https://magento.softwaretestingboard.com/gear/fitness-equipment.html");
-        ProductsPage productsPage = new ProductsPage(driver);
+        getDriver().get("https://magento.softwaretestingboard.com/gear/fitness-equipment.html");
+        ProductsPage productsPage = new ProductsPage(getDriver());
 
         // select random product
         ProductCard selectedProductCard = RandomPicker.getRandomElement(
