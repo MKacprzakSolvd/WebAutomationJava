@@ -1,6 +1,7 @@
 package com.solvd.components;
 
 import com.solvd.model.Product;
+import com.solvd.pages.ProductDetailsPage;
 import com.solvd.pages.ProductsPage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -20,6 +21,8 @@ public class ProductCard {
     private WebElement name;
     @FindBy(className = "price")
     private WebElement price;
+    @FindBy(className = "product-image-photo")
+    private WebElement image;
 
     @FindBy(xpath = ".//*[@attribute-code='size']//*[@option-label]")
     private List<WebElement> avaliableSizes;
@@ -95,11 +98,17 @@ public class ProductCard {
         return new ProductsPage(this.driver);
     }
 
+    public ProductDetailsPage goToProductDetailsPage() {
+        this.image.click();
+        return new ProductDetailsPage(this.driver);
+    }
+
     /**
      * extract price from string containing price
      */
     private static String extractPrice(String priceString) {
         // TODO find better way of extracting price - this might fail for different currency
+        //      tip: you can extract price from data-price-amount property (of price wrapper)
         // split string with price by $, and return last part
         String[] parts = priceString.split("\\$");
         return parts[parts.length - 1];

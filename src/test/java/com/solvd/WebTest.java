@@ -126,22 +126,22 @@ public class WebTest {
                             .formatted(product.getName()));
             productsPage = productCard.get().addToCart();
         }
-        int itemsInShoppingCart = productsPage.getShoppingCartPopup().getProductsCount();
+        int itemsInShoppingCart = productsPage.getShoppingCart().getProductsCount();
         Assert.assertEquals(itemsInShoppingCart, PRODUCTS_TO_ADD_TO_CART,
                 "Number of products in shopping cart (%d) doesn't match expected number (%d)."
                         .formatted(itemsInShoppingCart, PRODUCTS_TO_ADD_TO_CART));
         for (Product product : selectedProducts) {
             Assert.assertTrue(
-                    productsPage.getShoppingCartPopup().isProductInCart(product),
+                    productsPage.getShoppingCart().isProductInCart(product),
                     "Product '%s' was not in the shopping cart".formatted(product.getName()));
         }
 
         // remove products from card & check if they were removed
         for (Product product : selectedProducts) {
-            productsPage = productsPage.getShoppingCartPopup().removeFromCart(product);
+            productsPage = productsPage.getShoppingCart().removeFromCart(product);
         }
 
-        Assert.assertTrue(productsPage.getShoppingCartPopup().isEmpty(),
+        Assert.assertTrue(productsPage.getShoppingCart().isEmpty(),
                 "Shopping cart is not empty.");
     }
 
@@ -157,10 +157,10 @@ public class WebTest {
         Product selectedProduct = selectedProductCard.getProductData();
         productsPage = selectedProductCard.addToCart();
         // TODO: check if cart contains exactly one product
-        Assert.assertTrue(productsPage.getShoppingCartPopup().isProductInCart(selectedProduct),
+        Assert.assertTrue(productsPage.getShoppingCart().isProductInCart(selectedProduct),
                 "Selected product (%s) was not in the cart (on products page)."
                         .formatted(selectedProduct.getName()));
-        CheckoutPageStepOne checkoutPageStepOne = productsPage.getShoppingCartPopup().goToCheckout();
+        CheckoutPageStepOne checkoutPageStepOne = productsPage.getShoppingCart().goToCheckout();
 
         // complete first step of checkout
         int productsInShoppingCart = checkoutPageStepOne.getProductsCount();
@@ -218,5 +218,88 @@ public class WebTest {
             items are in the wrong order)
          */
         softAssert.assertAll();
+    }
+
+
+    @Test
+    public void verifyCheckoutFromItemDetailsPageTest() {
+        driver.get("https://magento.softwaretestingboard.com/men/bottoms-men.html");
+        ProductsPage productsPage = new ProductsPage(driver);
+
+        // select random product
+        ProductCard selectedProductCard = RandomPicker.getRandomElement(
+                productsPage.getProductCards());
+        Product selectedProduct = selectedProductCard.getProductData();
+
+        // open product details page
+        ProductDetailsPage productDetailsPage = selectedProductCard.goToProductDetailsPage();
+        Assert.assertTrue(productDetailsPage.isForElement(selectedProduct));
+
+        // add product to cart
+        productDetailsPage.addToCart();
+        // TODO: check if cart contains exactly one product
+        Assert.assertTrue(productsPage.getShoppingCart().isProductInCart(selectedProduct),
+                "Selected product (%s) was not in the cart (on product details page)."
+                        .formatted(selectedProduct.getName()));
+
+        // go to checkout
+        CheckoutPageStepOne checkoutPageStepOne = productsPage.getShoppingCart().goToCheckout();
+
+        // complete first step of checkout
+        int productsInShoppingCart = checkoutPageStepOne.getProductsCount();
+        Assert.assertEquals(productsInShoppingCart, 1,
+                "%d products in shopping car, while expecting only one, during the first step of checkout."
+                        .formatted(productsInShoppingCart));
+        Assert.assertTrue(checkoutPageStepOne.isProductInCart(selectedProduct),
+                "The selected product ('%s') is not in the shopping cart, during the first step of checkout."
+                        .formatted(selectedProduct.getName()));
+
+        // TODO add data provider / read data from config
+        CheckoutPageStepTwo checkoutPageStepTwo = checkoutPageStepOne.goToNextStep(
+                "a@b.com",
+                "John",
+                "Smith",
+                "Postal Inc.",
+                "ul. Wielopole 2",
+                "",
+                "",
+                "Kraków",
+                "małopolskie",
+                "12-345",
+                "Poland",
+                "123456789",
+                CheckoutPageStepOne.ShippingMethod.FIXED
+        );
+
+        CheckoutPageStepThree checkoutPageStepThree = checkoutPageStepTwo.placeOrder();
+        HomePage homePage = checkoutPageStepThree.returnToHomePage();
+    }
+
+
+    @Test
+    public void verifyAddingItemReviewTest() {
+        driver.get("https://magento.softwaretestingboard.com/gear/fitness-equipment.html");
+        ProductsPage productsPage = new ProductsPage(driver);
+
+        // select random product
+        ProductCard selectedProductCard = RandomPicker.getRandomElement(
+                productsPage.getProductCards());
+        Product selectedProduct = selectedProductCard.getProductData();
+
+        // open product details page
+        ProductDetailsPage productDetailsPage = selectedProductCard.goToProductDetailsPage();
+        Assert.assertTrue(productDetailsPage.isForElement(selectedProduct));
+
+        // add review
+        productDetailsPage = productDetailsPage.addReview(
+                5,
+                "user",
+                "generally ok",
+                "product seems to be good and solid while having reasonable price"
+        );
+
+        // check if review was added
+        Assert.assertTrue(productDetailsPage.isReviewAddedSuccessfullyAlertShown(),
+                "Failed to add review, or show alert that it was added");
     }
 }

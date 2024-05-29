@@ -15,7 +15,7 @@ import java.util.List;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.*;
 
-public class ShoppingCartPopup {
+public class ShoppingCart {
     // class (added to cartCounterWrapper)  indicating that cart content is updating
     private static final String CART_UPDATE_INDICATING_CLASS = "_block-content-loading";
 
@@ -50,7 +50,7 @@ public class ShoppingCartPopup {
     // confirmation button from modal. It it outside of shopping cart root element
     private By removeProductConfirmationButton = By.cssSelector(".modals-wrapper .action-accept");
 
-    public ShoppingCartPopup(WebElement shopingCartRootElement, WebDriver driver) {
+    public ShoppingCart(WebElement shopingCartRootElement, WebDriver driver) {
         PageFactory.initElements(shopingCartRootElement, this);
         this.shopingCartRootElement = shopingCartRootElement;
         this.driver = driver;

@@ -2,7 +2,7 @@ package com.solvd.pages;
 
 import com.solvd.components.ProductCard;
 import com.solvd.components.ProductFilter;
-import com.solvd.components.ShoppingCartPopup;
+import com.solvd.components.ShoppingCart;
 import com.solvd.model.Product;
 import lombok.Getter;
 import org.openqa.selenium.WebDriver;
@@ -21,8 +21,8 @@ public class ProductsPage {
     private List<ProductCard> productCards = new ArrayList<>();
 
     @FindBy(xpath = "//*[contains(@class,'page-header')]//*[@data-block='minicart']")
-    private WebElement shoppingCartPopupElement;
-    private ShoppingCartPopup shoppingCartPopup;
+    private WebElement shoppingCartElement;
+    private ShoppingCart shoppingCart;
 
     // TODO: extract string 'Size' and 'Color' from this and move it somewhere else (as constant)?
     // select filter block that have 'Size' in title
@@ -57,7 +57,7 @@ public class ProductsPage {
             this.productCards.add(new ProductCard(productCardElement, driver));
         }
 
-        this.shoppingCartPopup = new ShoppingCartPopup(this.shoppingCartPopupElement, this.driver);
+        this.shoppingCart = new ShoppingCart(this.shoppingCartElement, this.driver);
 
         this.sizeFilter = new ProductFilter(this.sizeFilterElement, this.driver);
         this.filtersMap.put(Filter.SIZE, this.sizeFilter);
@@ -89,8 +89,8 @@ public class ProductsPage {
                 .toList();
     }
 
-    public ShoppingCartPopup getShoppingCartPopup() {
-        return this.shoppingCartPopup;
+    public ShoppingCart getShoppingCart() {
+        return this.shoppingCart;
     }
 
     //FIXME: add support for case where filter is used (and thus inaccessible)
