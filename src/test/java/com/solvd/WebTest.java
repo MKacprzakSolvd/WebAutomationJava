@@ -42,7 +42,9 @@ public class WebTest {
 
     @AfterMethod
     public void tearDown() {
-        driver.get().quit();
+        if (driver != null) {
+            driver.get().quit();
+        }
     }
 
     public WebDriver getDriver() {
