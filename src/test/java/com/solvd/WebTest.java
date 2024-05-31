@@ -45,7 +45,7 @@ public class WebTest {
         driver.get().quit();
     }
 
-    protected WebDriver getDriver() {
+    public WebDriver getDriver() {
         return this.driver.get();
     }
 
