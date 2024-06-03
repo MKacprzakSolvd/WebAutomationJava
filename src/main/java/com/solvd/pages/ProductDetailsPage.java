@@ -2,6 +2,7 @@ package com.solvd.pages;
 
 import com.solvd.components.ShoppingCart;
 import com.solvd.model.Product;
+import com.solvd.model.Review;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -90,18 +91,13 @@ public class ProductDetailsPage {
         this.addToCartButton.click();
     }
 
-    public ProductDetailsPage addReview(int rating, String nickname, String summary, String review) {
-        if (rating < 1 || rating > 5) {
-            throw new IllegalArgumentException("Provided rating (%d) must be between 1 and 5 (inclusive)"
-                    .formatted(rating));
-        }
-
+    public ProductDetailsPage addReview(Review review) {
         // open ratings tab
         this.reviewsTabTitle.click();
 
         // fill in the form
         // click on star corresponding to selected rating
-        WebElement selectedRating = this.reviewRatings.get(rating - 1);
+        WebElement selectedRating = this.reviewRatings.get(review.getRating() - 1);
         int starsHeigth = selectedRating.getSize().getHeight();
         int starsWidth = selectedRating.getSize().getWidth();
         Actions actions = new Actions(this.driver);
@@ -110,9 +106,9 @@ public class ProductDetailsPage {
                 .click()
                 .perform();
 
-        this.reviewNickname.sendKeys(nickname);
-        this.reviewSummary.sendKeys(summary);
-        this.reviewReviewText.sendKeys(review);
+        this.reviewNickname.sendKeys(review.getUserNickname());
+        this.reviewSummary.sendKeys(review.getSummary());
+        this.reviewReviewText.sendKeys(review.getReviewContent());
         this.reviewSubmitButton.click();
 
         return new ProductDetailsPage(this.driver);

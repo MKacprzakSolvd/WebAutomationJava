@@ -2,7 +2,6 @@ package com.solvd.components;
 
 import com.solvd.model.Product;
 import com.solvd.pages.CheckoutPageStepOne;
-import com.solvd.pages.ProductsPage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -96,12 +95,15 @@ public class ShoppingCart {
         return false;
     }
 
-    // FIXME: no need to return new page
-    public ProductsPage removeFromCart(Product product) {
+    /**
+     * tries to remove product  from cart
+     * return true on succesfull removal,
+     * false on fail (i.e. product not in cart)
+     */
+    public boolean removeFromCart(Product product) {
         // TODO: rewrite with findProductCard when implemented
         if (!isProductInCart(product)) {
-            throw new IllegalArgumentException("Product '%s' is not in the shopping cart."
-                    .formatted(product.getName()));
+            return false;
         }
         for (int i = 0; i < this.productNamesElements.size(); i++) {
             if (product.getName().equals(this.productNamesElements.get(i).getText())) {
@@ -116,7 +118,7 @@ public class ShoppingCart {
         wait.until(visibilityOf(removalConfirmationButton));
         removalConfirmationButton.click();
         waitTillProductRemovedFromCart(product);
-        return new ProductsPage(this.driver);
+        return true;
     }
 
     // TODO: make this function return CheckoutPage

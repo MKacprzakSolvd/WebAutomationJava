@@ -1,6 +1,7 @@
 package com.solvd.pages;
 
 import com.solvd.model.Product;
+import com.solvd.model.ShippingInfo;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -72,35 +73,23 @@ public class CheckoutPageStepOne {
 
     // TODO create class for address with builder and just pass it in
     public CheckoutPageStepTwo goToNextStep(
-            String email,
-            String firstName,
-            String lastName,
-            String company,
-            String addressLine1,
-            String addressLine2,
-            String addressLine3,
-            String city,
-            String province,
-            String postalCode,
-            String country,
-            String phoneNumber,
-            ShippingMethod shippingMethod
+            ShippingInfo shippingInfo
     ) {
-        this.emailField.sendKeys(email);
-        this.firstNameField.sendKeys(firstName);
-        this.lastNameField.sendKeys(lastName);
-        this.companyField.sendKeys(company);
-        this.addressLine1Field.sendKeys(addressLine1);
-        this.addressLine2Field.sendKeys(addressLine2);
-        this.addressLine3Field.sendKeys(addressLine3);
-        this.cityField.sendKeys(city);
-        this.postalCodeField.sendKeys(postalCode);
-        this.phoneNumberField.sendKeys(phoneNumber);
+        this.emailField.sendKeys(shippingInfo.getEmail());
+        this.firstNameField.sendKeys(shippingInfo.getFirstName());
+        this.lastNameField.sendKeys(shippingInfo.getLastName());
+        this.companyField.sendKeys(shippingInfo.getCompany());
+        this.addressLine1Field.sendKeys(shippingInfo.getAddressLine1());
+        this.addressLine2Field.sendKeys(shippingInfo.getAddressLine2());
+        this.addressLine3Field.sendKeys(shippingInfo.getAddressLine3());
+        this.cityField.sendKeys(shippingInfo.getCity());
+        this.postalCodeField.sendKeys(shippingInfo.getPostalCode());
+        this.phoneNumberField.sendKeys(shippingInfo.getPhoneNumber());
 
         // select country
         Select selectCountry = new Select(this.countryDropdown);
         // TODO change this to select by value instead of selected text
-        selectCountry.selectByVisibleText(country);
+        selectCountry.selectByVisibleText(shippingInfo.getCountry());
 
         // select province
         // FIXME add support for case when you need to insert province
@@ -108,10 +97,10 @@ public class CheckoutPageStepOne {
         //       this depends on selected country
         // TODO maybe change this to select province by value??
         Select selectProvince = new Select(this.provinceDropdown);
-        selectProvince.selectByVisibleText(province);
+        selectProvince.selectByVisibleText(shippingInfo.getProvince());
 
         // FIXME add checking whether shipping method is avaliable
-        switch (shippingMethod) {
+        switch (shippingInfo.getShippingMethod()) {
             case FIXED -> this.fixedRateShippingMethodRadio.click();
             case TABLE_RATE -> this.tableRateShippingMethodRadio.click();
         }
@@ -150,8 +139,4 @@ public class CheckoutPageStepOne {
         wait.until(ExpectedConditions.elementToBeClickable(this.firstNameField));
     }
 
-    public enum ShippingMethod {
-        FIXED,
-        TABLE_RATE
-    }
 }

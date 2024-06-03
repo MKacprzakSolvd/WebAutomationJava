@@ -41,7 +41,7 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
-            <scope>test</scope>
+            <scope>compile</scope>
             <!-- exclude older log4j api version from testng -->
             <!-- <exclusions>
                 <exclusion>

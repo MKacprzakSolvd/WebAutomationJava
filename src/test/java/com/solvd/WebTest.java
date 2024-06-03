@@ -1,54 +1,52 @@
 package com.solvd;
 
 import com.solvd.components.ProductCard;
+import com.solvd.enums.ProductsFilter;
+import com.solvd.enums.ShippingMethod;
+import com.solvd.enums.SortOrder;
 import com.solvd.model.Product;
+import com.solvd.model.Review;
+import com.solvd.model.ShippingInfo;
 import com.solvd.pages.*;
+import com.solvd.util.AbstractTest;
 import com.solvd.util.RandomPicker;
+import com.solvd.util.Urls;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
-public class WebTest {
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+
+public class WebTest extends AbstractTest {
     // TODO: check if I should add volatile to logger
     private static final Logger LOGGER = LogManager.getLogger(WebTest.class.getName());
-    private ThreadLocal<WebDriver> driver = new ThreadLocal<>();
 
-    // TODO for multithreading BeforeMethod might be better - experiment
-    @BeforeMethod
-    public void setUp() {
-        ChromeOptions chromeOptions = new ChromeOptions();
-        try {
-            this.driver.set(
-                    new RemoteWebDriver(new URL("http://localhost:4444"), chromeOptions));
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-
-        driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-    }
-
-    @AfterMethod
-    public void tearDown() {
-        if (driver != null) {
-            driver.get().quit();
-        }
-    }
-
-    public WebDriver getDriver() {
-        return this.driver.get();
+    @DataProvider()
+    public Object[][] provideValidShippingInfo() {
+        return new Object[][]{
+                {
+                        ShippingInfo.builder()
+                                .email("a@b.com")
+                                .firstName("John")
+                                .lastName("Smith")
+                                .company("Postal Inc.")
+                                .addressLine1("ul. Wielopole 2")
+                                .city("Kraków")
+                                .province("małopolskie")
+                                .postalCode("12-345")
+                                .country("Poland")
+                                .phoneNumber("123456789")
+                                .shippingMethod(ShippingMethod.FIXED)
+                                .build()
+                }
+        };
     }
 
 
@@ -56,7 +54,7 @@ public class WebTest {
      * Verify Product Search
      * <p>
      * Steps:
-     * 1. Open https://magento.softwaretestingboard.com website
+     * 1. Open homepage
      * Result: Home page should load
      * 2. Insert "bag" into search field and click search
      * Result: Search page should open, containing non-empty list of items
@@ -65,7 +63,7 @@ public class WebTest {
     public void verifyProductSearchTest() {
         // TODO ! add asserts
         // TODO: move url's to separate file
-        getDriver().get("https://magento.softwaretestingboard.com/");
+        getDriver().get(Urls.HOME_URL);
         HomePage homePage = new HomePage(getDriver());
         SearchPage searchPage = homePage.searchForProduct("bag");
         for (var productCard : searchPage.getProductCards()) {
@@ -79,14 +77,14 @@ public class WebTest {
     // TODO: add test case description (steps, etc)
     public void verifySizeColorFiltersTest() {
         // open products page
-        getDriver().get("https://magento.softwaretestingboard.com/women/tops-women.html");
+        getDriver().get(Urls.WOMEN_TOPS);
         ProductsPage productsPage = new ProductsPage(getDriver());
 
         // filter by random size
         String randomSizeOption = RandomPicker.getRandomElement(
-                productsPage.getFilterOptions(ProductsPage.Filter.SIZE)
+                productsPage.getFilterOptions(ProductsFilter.SIZE)
         );
-        productsPage = productsPage.filterBy(ProductsPage.Filter.SIZE, randomSizeOption);
+        productsPage = productsPage.filterBy(ProductsFilter.SIZE, randomSizeOption);
 
         // make sure every element is avaliable in given size
         // FIXME: check it on all pages
@@ -98,9 +96,9 @@ public class WebTest {
 
         // filter by random color
         String randomColorOption = RandomPicker.getRandomElement(
-                productsPage.getFilterOptions(ProductsPage.Filter.COLOR)
+                productsPage.getFilterOptions(ProductsFilter.COLOR)
         );
-        productsPage = productsPage.filterBy(ProductsPage.Filter.COLOR, randomColorOption);
+        productsPage = productsPage.filterBy(ProductsFilter.COLOR, randomColorOption);
 
         // make sure every element is avaliable in given color and size
         // FIXME: check it on all pages
@@ -118,46 +116,50 @@ public class WebTest {
     @Test
     public void verifyAddRemoveFromShoppingCartTest() {
         // open products page
-        getDriver().get("https://magento.softwaretestingboard.com/men/tops-men.html");
+        getDriver().get(Urls.MEN_TOPS);
         ProductsPage productsPage = new ProductsPage(getDriver());
-        final int PRODUCTS_TO_ADD_TO_CART = 2;
+        final int PRODUCTS_TO_ADD_TO_CART_NUMBER = 2;
+        SoftAssert softAssert = new SoftAssert();
 
         // select two random products
         List<Product> selectedProducts = RandomPicker.getRandomElements(
-                productsPage.getProducts(), PRODUCTS_TO_ADD_TO_CART);
+                productsPage.getProducts(), PRODUCTS_TO_ADD_TO_CART_NUMBER);
 
         // add them to cart & check if they were added
         for (Product product : selectedProducts) {
             Optional<ProductCard> productCard = productsPage.findProductCard(product);
-            Assert.assertTrue(productCard.isPresent(),
+            softAssert.assertTrue(productCard.isPresent(),
                     "Unable to find product card corresponding to product '%s' in products page"
                             .formatted(product.getName()));
             productsPage = productCard.get().addToCart();
         }
         int itemsInShoppingCart = productsPage.getShoppingCart().getProductsCount();
-        Assert.assertEquals(itemsInShoppingCart, PRODUCTS_TO_ADD_TO_CART,
+        softAssert.assertEquals(itemsInShoppingCart, PRODUCTS_TO_ADD_TO_CART_NUMBER,
                 "Number of products in shopping cart (%d) doesn't match expected number (%d)."
-                        .formatted(itemsInShoppingCart, PRODUCTS_TO_ADD_TO_CART));
+                        .formatted(itemsInShoppingCart, PRODUCTS_TO_ADD_TO_CART_NUMBER));
         for (Product product : selectedProducts) {
-            Assert.assertTrue(
+            softAssert.assertTrue(
                     productsPage.getShoppingCart().isProductInCart(product),
                     "Product '%s' was not in the shopping cart".formatted(product.getName()));
         }
 
         // remove products from card & check if they were removed
         for (Product product : selectedProducts) {
-            productsPage = productsPage.getShoppingCart().removeFromCart(product);
+            softAssert.assertTrue(productsPage.getShoppingCart().removeFromCart(product),
+                    "Failed to remove product '%s' from shopping cart.".formatted(product.getName()));
         }
 
-        Assert.assertTrue(productsPage.getShoppingCart().isEmpty(),
+        softAssert.assertTrue(productsPage.getShoppingCart().isEmpty(),
                 "Shopping cart is not empty.");
+
+        softAssert.assertAll();
     }
 
 
-    @Test
-    public void verifyCheckoutProcessFromProductsPageTest() {
+    @Test(dataProvider = "provideValidShippingInfo")
+    public void verifyCheckoutProcessFromProductsPageTest(ShippingInfo shippingInfo) {
         // open products page
-        getDriver().get("https://magento.softwaretestingboard.com/gear/bags.html");
+        getDriver().get(Urls.GEAR_BAGS);
         ProductsPage productsPage = new ProductsPage(getDriver());
 
         // select random item, add it to the cart and go to checkout
@@ -165,36 +167,22 @@ public class WebTest {
         Product selectedProduct = selectedProductCard.getProductData();
         productsPage = selectedProductCard.addToCart();
         // TODO: check if cart contains exactly one product
-        Assert.assertTrue(productsPage.getShoppingCart().isProductInCart(selectedProduct),
+        assertTrue(productsPage.getShoppingCart().isProductInCart(selectedProduct),
                 "Selected product (%s) was not in the cart (on products page)."
                         .formatted(selectedProduct.getName()));
         CheckoutPageStepOne checkoutPageStepOne = productsPage.getShoppingCart().goToCheckout();
 
         // complete first step of checkout
         int productsInShoppingCart = checkoutPageStepOne.getProductsCount();
-        Assert.assertEquals(productsInShoppingCart, 1,
+        assertEquals(productsInShoppingCart, 1,
                 "%d products in shopping car, while expecting only one, during the first step of checkout."
                         .formatted(productsInShoppingCart));
-        Assert.assertTrue(checkoutPageStepOne.isProductInCart(selectedProduct),
+        assertTrue(checkoutPageStepOne.isProductInCart(selectedProduct),
                 "The selected product ('%s') is not in the shopping cart, during the first step of checkout."
                         .formatted(selectedProduct.getName()));
 
-        // TODO add data provider / read data from config
-        CheckoutPageStepTwo checkoutPageStepTwo = checkoutPageStepOne.goToNextStep(
-                "a@b.com",
-                "John",
-                "Smith",
-                "Postal Inc.",
-                "ul. Wielopole 2",
-                "",
-                "",
-                "Kraków",
-                "małopolskie",
-                "12-345",
-                "Poland",
-                "123456789",
-                CheckoutPageStepOne.ShippingMethod.FIXED
-        );
+        // TODO read this data from some config
+        CheckoutPageStepTwo checkoutPageStepTwo = checkoutPageStepOne.goToNextStep(shippingInfo);
 
         CheckoutPageStepThree checkoutPageStepThree = checkoutPageStepTwo.placeOrder();
         HomePage homePage = checkoutPageStepThree.returnToHomePage();
@@ -202,17 +190,17 @@ public class WebTest {
 
     @Test
     public void verifyItemSortingTest() {
-        getDriver().get("https://magento.softwaretestingboard.com/women/bottoms-women.html");
+        getDriver().get(Urls.WOMEN_BOTTOMS);
         ProductsPage productsPage = new ProductsPage(getDriver());
         SoftAssert softAssert = new SoftAssert();
 
-        ProductsPage.SortOrder[] sortOrdersToCheck = new ProductsPage.SortOrder[]{
-                ProductsPage.SortOrder.BY_NAME_A_TO_Z,
-                ProductsPage.SortOrder.BY_NAME_Z_TO_A,
-                ProductsPage.SortOrder.BY_PRICE_ASCENDING,
-                ProductsPage.SortOrder.BY_PRICE_DESCENDING};
+        SortOrder[] sortOrdersToCheck = new SortOrder[]{
+                SortOrder.BY_NAME_A_TO_Z,
+                SortOrder.BY_NAME_Z_TO_A,
+                SortOrder.BY_PRICE_ASCENDING,
+                SortOrder.BY_PRICE_DESCENDING};
 
-        for (ProductsPage.SortOrder sortOrder : sortOrdersToCheck) {
+        for (SortOrder sortOrder : sortOrdersToCheck) {
             productsPage = productsPage.setSortOrder(sortOrder);
             softAssert.assertTrue(productsPage.isSortedBy(sortOrder),
                     "Products sorted incorrectly according to sort order '%s'"
@@ -229,9 +217,9 @@ public class WebTest {
     }
 
 
-    @Test
-    public void verifyCheckoutFromItemDetailsPageTest() {
-        getDriver().get("https://magento.softwaretestingboard.com/men/bottoms-men.html");
+    @Test(dataProvider = "provideValidShippingInfo")
+    public void verifyCheckoutFromItemDetailsPageTest(ShippingInfo shippingInfo) {
+        getDriver().get(Urls.MEN_BOTTOMS);
         ProductsPage productsPage = new ProductsPage(getDriver());
 
         // select random product
@@ -241,12 +229,12 @@ public class WebTest {
 
         // open product details page
         ProductDetailsPage productDetailsPage = selectedProductCard.goToProductDetailsPage();
-        Assert.assertTrue(productDetailsPage.isForElement(selectedProduct));
+        assertTrue(productDetailsPage.isForElement(selectedProduct));
 
         // add product to cart
         productDetailsPage.addToCart();
         // TODO: check if cart contains exactly one product
-        Assert.assertTrue(productsPage.getShoppingCart().isProductInCart(selectedProduct),
+        assertTrue(productsPage.getShoppingCart().isProductInCart(selectedProduct),
                 "Selected product (%s) was not in the cart (on product details page)."
                         .formatted(selectedProduct.getName()));
 
@@ -255,29 +243,15 @@ public class WebTest {
 
         // complete first step of checkout
         int productsInShoppingCart = checkoutPageStepOne.getProductsCount();
-        Assert.assertEquals(productsInShoppingCart, 1,
+        assertEquals(productsInShoppingCart, 1,
                 "%d products in shopping car, while expecting only one, during the first step of checkout."
                         .formatted(productsInShoppingCart));
-        Assert.assertTrue(checkoutPageStepOne.isProductInCart(selectedProduct),
+        assertTrue(checkoutPageStepOne.isProductInCart(selectedProduct),
                 "The selected product ('%s') is not in the shopping cart, during the first step of checkout."
                         .formatted(selectedProduct.getName()));
 
-        // TODO add data provider / read data from config
-        CheckoutPageStepTwo checkoutPageStepTwo = checkoutPageStepOne.goToNextStep(
-                "a@b.com",
-                "John",
-                "Smith",
-                "Postal Inc.",
-                "ul. Wielopole 2",
-                "",
-                "",
-                "Kraków",
-                "małopolskie",
-                "12-345",
-                "Poland",
-                "123456789",
-                CheckoutPageStepOne.ShippingMethod.FIXED
-        );
+        // TODO read this data from some config
+        CheckoutPageStepTwo checkoutPageStepTwo = checkoutPageStepOne.goToNextStep(shippingInfo);
 
         CheckoutPageStepThree checkoutPageStepThree = checkoutPageStepTwo.placeOrder();
         HomePage homePage = checkoutPageStepThree.returnToHomePage();
@@ -286,7 +260,7 @@ public class WebTest {
 
     @Test
     public void verifyAddingItemReviewTest() {
-        getDriver().get("https://magento.softwaretestingboard.com/gear/fitness-equipment.html");
+        getDriver().get(Urls.GEAR_FITNESS_EQUIPMENT);
         ProductsPage productsPage = new ProductsPage(getDriver());
 
         // select random product
@@ -296,18 +270,20 @@ public class WebTest {
 
         // open product details page
         ProductDetailsPage productDetailsPage = selectedProductCard.goToProductDetailsPage();
-        Assert.assertTrue(productDetailsPage.isForElement(selectedProduct));
+        assertTrue(productDetailsPage.isForElement(selectedProduct));
+
+        Review review = Review.builder()
+                .rating(5)
+                .userNickname("user")
+                .summary("generally ok")
+                .reviewContent("product seems to be good and solid while having reasonable price")
+                .build();
 
         // add review
-        productDetailsPage = productDetailsPage.addReview(
-                5,
-                "user",
-                "generally ok",
-                "product seems to be good and solid while having reasonable price"
-        );
+        productDetailsPage = productDetailsPage.addReview(review);
 
         // check if review was added
-        Assert.assertTrue(productDetailsPage.isReviewAddedSuccessfullyAlertShown(),
+        assertTrue(productDetailsPage.isReviewAddedSuccessfullyAlertShown(),
                 "Failed to add review, or show alert that it was added");
     }
 }

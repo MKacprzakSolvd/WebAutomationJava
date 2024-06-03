@@ -3,8 +3,9 @@ package com.solvd.pages;
 import com.solvd.components.ProductCard;
 import com.solvd.components.ProductFilter;
 import com.solvd.components.ShoppingCart;
+import com.solvd.enums.ProductsFilter;
+import com.solvd.enums.SortOrder;
 import com.solvd.model.Product;
-import lombok.Getter;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -40,7 +41,7 @@ public class ProductsPage {
     private ProductFilter colorFilter;
 
     // maps from filters enum to filter object
-    private Map<Filter, ProductFilter> filtersMap = new EnumMap<>(Filter.class);
+    private Map<ProductsFilter, ProductFilter> filtersMap = new EnumMap<>(ProductsFilter.class);
 
     // there are two elements with id 'sorter', so this locator is required
     @FindBy(css = "#authenticationPopup + .toolbar-products #sorter")
@@ -60,9 +61,9 @@ public class ProductsPage {
         this.shoppingCart = new ShoppingCart(this.shoppingCartElement, this.driver);
 
         this.sizeFilter = new ProductFilter(this.sizeFilterElement, this.driver);
-        this.filtersMap.put(Filter.SIZE, this.sizeFilter);
+        this.filtersMap.put(ProductsFilter.SIZE, this.sizeFilter);
         this.colorFilter = new ProductFilter(this.colorFilterElement, this.driver);
-        this.filtersMap.put(Filter.COLOR, this.colorFilter);
+        this.filtersMap.put(ProductsFilter.COLOR, this.colorFilter);
     }
 
 
@@ -94,13 +95,13 @@ public class ProductsPage {
     }
 
     //FIXME: add support for case where filter is used (and thus inaccessible)
-    public List<String> getFilterOptions(Filter filter) {
-        return this.filtersMap.get(filter).getOptions();
+    public List<String> getFilterOptions(ProductsFilter productsFilter) {
+        return this.filtersMap.get(productsFilter).getOptions();
     }
 
     //FIXME: add support for case where filter is used (and thus inaccessible)
-    public ProductsPage filterBy(Filter filter, String option) {
-        return this.filtersMap.get(filter).filterBy(option);
+    public ProductsPage filterBy(ProductsFilter productsFilter, String option) {
+        return this.filtersMap.get(productsFilter).filterBy(option);
     }
 
     public SortOrder getSortOrder() {
@@ -138,7 +139,7 @@ public class ProductsPage {
     public boolean isSortedBy(SortOrder sortOrder) {
         List<Product> products = getProducts();
         List<Product> sortedProducts = products.stream()
-                .sorted(sortOrder.comparator)
+                .sorted(sortOrder.getComparator())
                 .toList();
         for (int i = 0; i < sortedProducts.size(); i++) {
             if (!sortedProducts.get(i).getName().equals(
@@ -152,52 +153,4 @@ public class ProductsPage {
     // TODO: implement
     // isFilterApplied
     // getAppliedFilters
-
-
-    public enum Filter {
-        SIZE,
-        COLOR;
-    }
-
-    public enum SortOrder {
-        BY_NAME_A_TO_Z("name", true,
-                Product::compareByNameAToZ),
-        BY_NAME_Z_TO_A("name", false,
-                Product::compareByNameZToA),
-        BY_PRICE_ASCENDING("price", true,
-                Product::compareByPriceAscending),
-        BY_PRICE_DESCENDING("price", false,
-                Product::compareByPriceDescending),
-        BY_POSITION_ASCENDING("position", true,
-                SortOrder::unimplementedComparator),
-        BY_POSITION_DESCENDING("position", false,
-                SortOrder::unimplementedComparator);
-
-        @Getter
-        private String value;
-        @Getter
-        private boolean ascending;
-        @Getter
-        Comparator<Product> comparator;
-
-        private SortOrder(String value, boolean ascending, Comparator<Product> comparator) {
-            this.value = value;
-            this.ascending = ascending;
-            this.comparator = comparator;
-        }
-
-        public static SortOrder valueOf(String value, boolean ascending) {
-            for (SortOrder sortOrder : SortOrder.values()) {
-                if (sortOrder.value.equals(value) && sortOrder.ascending == ascending) {
-                    return sortOrder;
-                }
-            }
-            throw new IllegalArgumentException("Cannot find enum value matching:" +
-                    "value=" + value + ", ascending=" + ascending);
-        }
-
-        private static int unimplementedComparator(Product product1, Product product2) {
-            throw new UnsupportedOperationException("This comparator is not implemented.");
-        }
-    }
 }
