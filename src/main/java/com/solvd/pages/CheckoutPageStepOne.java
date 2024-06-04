@@ -2,10 +2,10 @@ package com.solvd.pages;
 
 import com.solvd.model.Product;
 import com.solvd.model.ShippingInfo;
+import com.solvd.util.AbstractPage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -13,9 +13,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.List;
 
-public class CheckoutPageStepOne {
-    private WebDriver driver;
-
+public class CheckoutPageStepOne extends AbstractPage {
     @FindBy(id = "customer-email")
     private WebElement emailField;
     @FindBy(xpath = "//*[@name='shippingAddress.firstname']//*[@name='firstname']")
@@ -66,8 +64,7 @@ public class CheckoutPageStepOne {
     private List<WebElement> productNames;
 
     public CheckoutPageStepOne(WebDriver driver) {
-        this.driver = driver;
-        PageFactory.initElements(driver, this);
+        super(driver);
         waitTillCheckoutLoaded();
     }
 
@@ -108,7 +105,7 @@ public class CheckoutPageStepOne {
         // go to next step
         this.goToNextStepButton.click();
 
-        return new CheckoutPageStepTwo(this.driver);
+        return new CheckoutPageStepTwo(getDriver());
     }
 
     public int getProductsCount() {
@@ -134,7 +131,7 @@ public class CheckoutPageStepOne {
     }
 
     private void waitTillCheckoutLoaded() {
-        WebDriverWait wait = new WebDriverWait(this.driver, Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(10));
         wait.until(ExpectedConditions.elementToBeClickable(this.emailField));
         wait.until(ExpectedConditions.elementToBeClickable(this.firstNameField));
     }

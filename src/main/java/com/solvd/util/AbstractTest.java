@@ -2,6 +2,7 @@ package com.solvd.util;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -16,9 +17,12 @@ public abstract class AbstractTest {
     @BeforeMethod
     public void setUp() {
         ChromeOptions chromeOptions = new ChromeOptions();
+        FirefoxOptions firefoxOptions = new FirefoxOptions();
         try {
             this.driver.set(
                     new RemoteWebDriver(new URL("http://localhost:4444"), chromeOptions));
+            //this.driver.set(
+            //        new RemoteWebDriver(new URL("http://localhost:4444"), firefoxOptions));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

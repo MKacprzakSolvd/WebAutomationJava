@@ -3,18 +3,16 @@ package com.solvd.pages;
 import com.solvd.components.ShoppingCart;
 import com.solvd.model.Product;
 import com.solvd.model.Review;
+import com.solvd.util.AbstractPage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-public class ProductDetailsPage {
-    private WebDriver driver;
-
+public class ProductDetailsPage extends AbstractPage {
     @FindBy(xpath = "//*[contains(@class,'page-header')]//*[@data-block='minicart']")
     private WebElement shoppingCartElement;
     private ShoppingCart shoppingCart;
@@ -55,10 +53,10 @@ public class ProductDetailsPage {
 
 
     public ProductDetailsPage(WebDriver driver) {
-        this.driver = driver;
-        PageFactory.initElements(driver, this);
+        super(driver);
+
         this.shoppingCart = new ShoppingCart(
-                this.shoppingCartElement, this.driver);
+                this.shoppingCartElement, getDriver());
     }
 
 
@@ -100,7 +98,7 @@ public class ProductDetailsPage {
         WebElement selectedRating = this.reviewRatings.get(review.getRating() - 1);
         int starsHeigth = selectedRating.getSize().getHeight();
         int starsWidth = selectedRating.getSize().getWidth();
-        Actions actions = new Actions(this.driver);
+        Actions actions = new Actions(getDriver());
         // click on the last star (assumes starWidth == starHeigth)
         actions.moveToElement(selectedRating, starsWidth / 2 - starsHeigth / 2, 0)
                 .click()
@@ -111,7 +109,7 @@ public class ProductDetailsPage {
         this.reviewReviewText.sendKeys(review.getReviewContent());
         this.reviewSubmitButton.click();
 
-        return new ProductDetailsPage(this.driver);
+        return new ProductDetailsPage(getDriver());
     }
 
     /**

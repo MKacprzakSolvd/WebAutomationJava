@@ -6,17 +6,15 @@ import com.solvd.components.ShoppingCart;
 import com.solvd.enums.ProductsFilter;
 import com.solvd.enums.SortOrder;
 import com.solvd.model.Product;
+import com.solvd.util.AbstractPage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.Select;
 
 import java.util.*;
 
-public class ProductsPage {
-    private WebDriver driver;
-
+public class ProductsPage extends AbstractPage {
     @FindBy(css = ".products .product-items .product-item")
     private List<WebElement> productCardElements;
     private List<ProductCard> productCards = new ArrayList<>();
@@ -51,18 +49,17 @@ public class ProductsPage {
 
 
     public ProductsPage(WebDriver driver) {
-        this.driver = driver;
-        PageFactory.initElements(driver, this);
+        super(driver);
 
         for (WebElement productCardElement : productCardElements) {
             this.productCards.add(new ProductCard(productCardElement, driver));
         }
 
-        this.shoppingCart = new ShoppingCart(this.shoppingCartElement, this.driver);
+        this.shoppingCart = new ShoppingCart(this.shoppingCartElement, getDriver());
 
-        this.sizeFilter = new ProductFilter(this.sizeFilterElement, this.driver);
+        this.sizeFilter = new ProductFilter(this.sizeFilterElement, getDriver());
         this.filtersMap.put(ProductsFilter.SIZE, this.sizeFilter);
-        this.colorFilter = new ProductFilter(this.colorFilterElement, this.driver);
+        this.colorFilter = new ProductFilter(this.colorFilterElement, getDriver());
         this.filtersMap.put(ProductsFilter.COLOR, this.colorFilter);
     }
 
@@ -122,13 +119,13 @@ public class ProductsPage {
         if (!currentSortOrder.getValue().equals(sortOrder.getValue())) {
             Select sortTypeSelect = new Select(this.sortTypeSelector);
             sortTypeSelect.selectByValue(sortOrder.getValue());
-            productsPage = new ProductsPage(this.driver);
+            productsPage = new ProductsPage(getDriver());
         }
 
         // select correct sort direction
         if (currentSortOrder.isAscending() != sortOrder.isAscending()) {
             this.sortDirectionSelector.click();
-            productsPage = new ProductsPage(this.driver);
+            productsPage = new ProductsPage(getDriver());
         }
 
         return productsPage;
